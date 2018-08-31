@@ -56,6 +56,10 @@ services:
       - IMPORT_DONE=import_done
       # folder for diff which hasn't been imported yet
       - IMPORT_QUEUE=import_queue
+      # https://imposm.org/docs/imposm3/latest/tutorial.html#expire-tiles
+      - EXPIRETILES_DIR=expiretiles_dir
+      # https://imposm.org/docs/imposm3/latest/tutorial.html#expire-tiles
+      - EXPIRETILES_ZOOM=14
       # it can be 3857
       - SRID=4326
       # see http://imposm.org/docs/imposm3/latest/tutorial.html#optimize
