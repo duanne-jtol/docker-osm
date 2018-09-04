@@ -43,6 +43,8 @@ class Importer(object):
             'CACHE': 'cache',
             'IMPORT_DONE': 'import_done',
             'IMPORT_QUEUE': 'import_queue',
+            'EXPIRETILES_DIR': 'expiretiles_dir',
+            'EXPIRETILES_ZOOM': '14',
             'SRID': '4326',
             'OPTIMIZE': 'false',
             'DBSCHEMA_PRODUCTION': 'public',
@@ -104,7 +106,7 @@ class Importer(object):
             self.info('Qgis style: ' + self.default['QGIS_STYLE'])
 
         # Check folders.
-        folders = ['IMPORT_QUEUE', 'IMPORT_DONE', 'SETTINGS', 'CACHE']
+        folders = ['IMPORT_QUEUE', 'IMPORT_DONE', 'SETTINGS', 'CACHE', 'EXPIRETILES_DIR']
         for folder in folders:
             if not isabs(self.default[folder]):
                 # Get the absolute path.
@@ -334,6 +336,8 @@ class Importer(object):
                     command += ['-diffdir', self.default['SETTINGS']]
                     command += ['-mapping', self.mapping_file]
                     command += ['-connection', self.postgis_uri]
+                    command += ['-expiretiles-dir', self.default['EXPIRETILES_DIR']]
+                    command += ['-expiretiles-zoom', self.default['EXPIRETILES_ZOOM']]
                     command += [join(self.default['IMPORT_QUEUE'], diff)]
 
                     self.info(' '.join(command))
