@@ -1,6 +1,7 @@
 FROM golang:1.10
 MAINTAINER Etienne Trimaille <etienne.trimaille@gmail.com>
 
+ENV BF_DOWNLOAD_URL https://download.geofabrik.de/europe/belgium-latest.osm.pbf
 RUN apt update && apt install -y python3-pip \
       libprotobuf-dev libleveldb-dev libgeos-dev \
       libpq-dev python3-dev postgresql-client-9.6 python-setuptools \
@@ -18,5 +19,13 @@ RUN pip3 install -r /home/requirements.txt
 
 ADD importer.py /home/
 
+# Add YAML Mapping file
+ADD mapping.yml /home/settings/mapping.yml
+# Add Belgium PBF for initial import
+#COPY ./belgium-latest.osm.pbf /home/settings/belgium-latest.osm.pbf
+ADD $BF_DOWNLOAD_URL /home/settings/belgium-latest.osm.pbf
+
+ADD wait-for-postgres.sh /wait-for-postgres.sh
+RUN chmod +x /wait-for-postgres.sh
 WORKDIR /home
-CMD ["python3", "-u", "/home/importer.py"]
+CMD ["/wait-for-postgres.sh", "python3", "-u", "/home/importer.py"]
