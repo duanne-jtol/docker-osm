@@ -43,8 +43,6 @@ class Importer(object):
             'CACHE': 'cache',
             'IMPORT_DONE': 'import_done',
             'IMPORT_QUEUE': 'import_queue',
-            'EXPIRETILES_DIR': 'expiretiles_dir',
-            'EXPIRETILES_ZOOM': '14',
             'SRID': '4326',
             'OPTIMIZE': 'false',
             'DBSCHEMA_PRODUCTION': 'public',
@@ -106,7 +104,7 @@ class Importer(object):
             self.info('Qgis style: ' + self.default['QGIS_STYLE'])
 
         # Check folders.
-        folders = ['IMPORT_QUEUE', 'IMPORT_DONE', 'SETTINGS', 'CACHE', 'EXPIRETILES_DIR']
+        folders = ['IMPORT_QUEUE', 'IMPORT_DONE', 'SETTINGS', 'CACHE']
         for folder in folders:
             if not isabs(self.default[folder]):
                 # Get the absolute path.
@@ -241,16 +239,16 @@ class Importer(object):
 
         The user must import the clip shapefile to the database!
         """
-        self.info('Import clip function.')
+        self.info('Import clip SQL function.')
         command = ['psql']
         command += ['-h', self.default['POSTGRES_HOST']]
         command += ['-U', self.default['POSTGRES_USER']]
         command += ['-d', self.default['POSTGRES_DBNAME']]
         command += ['-f', self.clip_sql_file]
         call(command)
-        self.info('!! Be sure to run \'make import_clip\' !!')
+        self.info('!! Be sure to run \'make import_clip\' to import the shapefile into the DB !!')
 
-    def clip(self):
+    def perform_clip_in_db(self):
         """Perform clipping if the clip table is here."""
         if self.count_table('clip') == 1:
             self.info('Clipping')
@@ -315,7 +313,7 @@ class Importer(object):
 
         if self.clip_shape_file:
             self._import_clip_function()
-            self.clip()
+            self.perform_clip_in_db()
 
         if self.qgis_style:
             self.import_qgis_styles()
@@ -336,8 +334,6 @@ class Importer(object):
                     command += ['-diffdir', self.default['SETTINGS']]
                     command += ['-mapping', self.mapping_file]
                     command += ['-connection', self.postgis_uri]
-                    command += ['-expiretiles-dir', self.default['EXPIRETILES_DIR']]
-                    command += ['-expiretiles-zoom', self.default['EXPIRETILES_ZOOM']]
                     command += [join(self.default['IMPORT_QUEUE'], diff)]
 
                     self.info(' '.join(command))
@@ -352,7 +348,7 @@ class Importer(object):
                         self.update_timestamp(database_timestamp)
 
                         if self.clip_shape_file:
-                            self.clip()
+                            self.perform_clip_in_db()
 
                         self.info('Import diff successful : %s' % diff)
                     else:

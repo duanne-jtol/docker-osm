@@ -1,30 +1,34 @@
 version: '2.1'
 
 volumes:
-  osm-postgis-data:
+  # osm-postgis-data:
   import_done:
   import_queue:
   cache:
 
 services:
-  db:
-    # About the postgresql version, it should match in the dockerfile of docker-imposm3
-    image: kartoza/postgis:9.6-2.4
-    hostname: db
-    container_name: dockerosm_db
-    environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASS=docker
-      - POSTGRES_DBNAME=gis
-      # Uncomment to expose the postgis database on the network
-      # - ALLOW_IP_RANGE= 0.0.0.0/0
-    volumes:
-      - 'osm-postgis-data:/var/lib/postgresql'
-    # Uncomment to use the postgis database from outside the docker network
-    # ports:
-    #  - "35432:5432"
-    healthcheck:
-        test: "exit 0"
+  # test:
+  #  image: ubuntu
+  #  command: sleep 8600
+
+  #db:
+  #  # About the postgresql version, it should match in the dockerfile of docker-imposm3
+  #  image: kartoza/postgis:9.6-2.4
+  #  hostname: db
+  #  container_name: dockerosm_db
+  #  environment:
+  #    - POSTGRES_USER=docker
+  #    - POSTGRES_PASS=docker
+  #    - POSTGRES_DBNAME=gis
+  #    # Uncomment to expose the postgis database on the network
+  #    - ALLOW_IP_RANGE= 0.0.0.0/0
+  #  volumes:
+  #    - 'osm-postgis-data:/var/lib/postgresql'
+  #  # Uncomment to use the postgis database from outside the docker network
+  #  ports:
+  #    - "35432:5432"
+  #  healthcheck:
+  #      test: "exit 0"
 
   imposm:
     image: kartoza/docker-osm:imposm-latest
@@ -36,18 +40,18 @@ services:
       - import_done:/home/import_done
       - import_queue:/home/import_queue
       - cache:/home/cache
-    depends_on:
-        db:
-          condition: service_healthy
+   # depends_on:
+   #     db:
+   #       condition: service_healthy
     environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASS=docker
-      - POSTGRES_DBNAME=gis
+      - POSTGRES_USER=geonode
+      - POSTGRES_PASS=**************
+      - POSTGRES_DBNAME=geonode_data
       - POSTGRES_PORT=5432
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=178.32.143.29
       # seconds between 2 executions of the script
       # if 0, then no update will be done, only the first initial import from the PBF
-      - TIME=120
+      - TIME=900
       # folder for settings (with *.json and *.sql)
       - SETTINGS=settings
       # folder for caching
@@ -56,10 +60,6 @@ services:
       - IMPORT_DONE=import_done
       # folder for diff which hasn't been imported yet
       - IMPORT_QUEUE=import_queue
-      # https://imposm.org/docs/imposm3/latest/tutorial.html#expire-tiles
-      - EXPIRETILES_DIR=expiretiles_dir
-      # https://imposm.org/docs/imposm3/latest/tutorial.html#expire-tiles
-      - EXPIRETILES_ZOOM=14
       # it can be 3857
       - SRID=4326
       # see http://imposm.org/docs/imposm3/latest/tutorial.html#optimize
@@ -73,7 +73,7 @@ services:
       # Install some styles if you are using the default mapping. It can be 'yes' or 'no'
       - QGIS_STYLE=yes
       # Use clip in the database
-      - CLIP=no
+      - CLIP=yes
 
   osmupdate:
     build: docker-osmupdate
@@ -85,9 +85,9 @@ services:
       - import_done:/home/import_done
       - import_queue:/home/import_queue
       - cache:/home/cache
-    depends_on:
-      db:
-        condition: service_healthy
+   # depends_on:
+   #   db:
+   #     condition: service_healthy
     environment:
       # These are all currently the defaults but listed here for your
       # convenience if you want to change them
@@ -107,4 +107,4 @@ services:
       - IMPORT_DONE=import_done
       # seconds between 2 executions of the script
       # if 0, then no update will be done, only the first initial import from the PBF
-      - TIME=120
+      - TIME=900

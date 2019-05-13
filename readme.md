@@ -1,4 +1,4 @@
-# Docker-OSM
+# Docker-OSM for Thailand
 
 A docker compose project to setup an OSM PostGIS database with automatic
 updates from OSM periodically.
@@ -7,41 +7,21 @@ The only file you need is a PBF file and run the docker compose project.
 
 ## Quick setup
 
-As a quick example, we are going to setup Docker-OSM with default values everywhere:
-* Download a PBF file from http://download.geofabrik.de/
+As a quick implementation for Thailand, we are going to setup Docker-OSM with default values everywhere:
+* Download the PBF file from https://download.geofabrik.de/asia/thailand-latest.osm.pbf
 * Put the file in the `settings` folder.
-* If you want to connect from your local QGIS Desktop:
-  * In the file `docker-compose.yml`, uncomment the block:
-
-```yml
-# Uncomment to use the postgis database from outside the docker network
-ports:
- - "35432:5432"
-```
 * Do `make run` in the build directory. This will download and execute the docker-osm project. It might be very long depending of your bandwidth and the PBF you are importing.
-* In QGIS, add a new PostGIS connexion: `localhost`, database `gis`, port `35432`, `docker` for both username and password.
-* That's it! You have a OSM database, up and running. The update is done every 2 minutes from the main OSM website.
+* Do `make import_clip` in the build directory. This will import the Thailand / Chiang-Mai country-border shapefile into the database and the clipping sql function needed for clipping the updates according to the territory of Thailand / Chiang-Mai.
+* Check the data availability with PGAdmin or QGIS, by adding a new PostGIS connection: `localhost`(or the IP address/domain name of your server), database `geonode_data`, port `35432`, `geonode` for both username and password.
+* That's it! You have an OSM database, up and running. The update is done every 15 minutes from the main OSM website.
 
 For further reading and customizations, read below.
-
-## Docker cloud
-
-Dockerfiles are executed on https://cloud.docker.com
-
-```bash
-docker pull kartoza/docker-osm:imposm-latest
-docker pull kartoza/docker-osm:osmupdate-latest
-```
-
-To run you can use the provided docker-compose project and use the images
-hosted on the internet. This is useful if you want to integrate Docker-OSM in
-your existing docker-compose project.
 
 ## Usage
 
 ### PBF File
-In this example we will set up an OSM database for South Africa that 
-will pull for updates every 2 minutes.
+In this example we will set up an OSM database for Thailand / Chiang-Mai that 
+will pull for updates every 15 minutes.
 
 First get a PBF file from your area and put this file in the 'settings' folder.
 You can download some PBF files on these URLS for instance :
@@ -50,7 +30,7 @@ You can download some PBF files on these URLS for instance :
 
 ```bash
 cd settings
-wget -c -O country.pbf http://download.openstreetmap.fr/extracts/africa/south_africa.osm.pbf
+wget -c -O country.pbf https://download.geofabrik.de/asia/thailand-latest.osm.pbf
 ```
 
 You must put only one PBF file in the settings folder. Only the last one will be read.
@@ -66,7 +46,7 @@ https://raw.githubusercontent.com/omniscale/imposm3/master/example-mapping.yml
 ### Updates
 
 You can configure the time interval in the docker-compose file. By default,
-it's two minutes. If you set the TIME variable to 0, no diff files will be
+it's 15 minutes. If you set the TIME variable to 0, no diff files will be
 imported.
 
 The default update stream is worldwide. So even if you imported a local PBF, if
@@ -76,9 +56,10 @@ you don't set a clipping area, you will end with data from all over the world.
 
 You can put a shapefile in the clip folder. This shapefile will be 
 used for clipping every features after the import.
-This file has to be named 'clip.shp'. When the database container is 
-running, import the shapefile in the database using the command : 
-'make import_clip'.
+This file has to be named 'clip.shp' and in the CRS you are using in the database (4326 by default).
+When the database container is running, import the shapefile in the database using the command : 
+
+`make import_clip`.
 
 You can remove the clip file : `make remove_clip`.
 
@@ -147,12 +128,12 @@ regional diffs rather than the global one.
 
 You can specify a polygonal area for the diff so that it will only apply features
 from the diff that fall within that area. For example providing a polygon of the
-borders of Malawi will result in only Malawi features being extracted from the diff.
+borders of Thailand / Chiang-Mai will result in only Thailand / Chiang-Mai features being extracted from the diff.
 
 **Note:** the diff retrieved and options specified here are not related to the
-initial base map used - so for example if your initial base map is for Malawi and
+initial base map used - so for example if your initial base map is for Thailand / Chiang-Mai and
 you specify a diff area in Botswana, updated features in Botswana will be applied
-to your base map which only includes features from Malawi. For this reason, take
+to your base map which only includes features from Thailand / Chiang-Mai. For this reason, take
 care to ensure that your diff area coincides with the region covered by your
 original base map.
 
@@ -190,7 +171,7 @@ If you are using docker-compose, you can use these settings within the
 ### Docker ImpOSM3
 
 This image will take care of doing the initial load for the selected region
-(e.g. planet, or a country such as Malawi) into your database. It will then
+(e.g. planet, or a country such as Thailand / Chiang-Mai) into your database. It will then
 apply, at a regular interval (default is 2 minutes), any diff that arrives
 in the /home/import_queue folder to the postgis OSM database. The diffs
 are fetched by a separate container (see osm_update container).
@@ -204,6 +185,7 @@ With -e, you can add some settings :
  - TIME = 120, seconds between 2 executions of the script
  - POSTGRES_USER = docker, default user
  - POSTGRES_PASS = docker, default password
+ - PGPASSWORD = docker, default password (needed for specifying password during psql operations)
  - POSTGRES_HOST = db
  - POSTGRES_PORT = 5432
  - SETTINGS = settings, folder for settings (with *.json and *.sql)
