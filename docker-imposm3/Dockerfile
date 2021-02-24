@@ -1,10 +1,10 @@
-FROM golang:1.10
+FROM golang:buster
 MAINTAINER Etienne Trimaille <etienne.trimaille@gmail.com>
 
-ENV BF_DOWNLOAD_URL https://download.geofabrik.de/europe/belgium-latest.osm.pbf
+ENV BF_DOWNLOAD_URL http://download.geofabrik.de/europe/sweden-latest.osm.pbf
 RUN apt update && apt install -y python3-pip \
       libprotobuf-dev libleveldb-dev libgeos-dev \
-      libpq-dev python3-dev postgresql-client-9.6 python-setuptools \
+      libpq-dev python3-dev postgresql-client-11 python-setuptools \
       --no-install-recommends
 
 RUN ln -s /usr/lib/libgeos_c.so /usr/lib/libgeos.so
@@ -21,9 +21,8 @@ ADD importer.py /home/
 
 # Add YAML Mapping file
 ADD mapping.yml /home/settings/mapping.yml
-# Add Belgium PBF for initial import
-#COPY ./belgium-latest.osm.pbf /home/settings/belgium-latest.osm.pbf
-ADD $BF_DOWNLOAD_URL /home/settings/belgium-latest.osm.pbf
+# Add Sweden PBF for initial import
+ADD $BF_DOWNLOAD_URL /home/settings/sweden-latest.osm.pbf
 
 ADD wait-for-postgres.sh /wait-for-postgres.sh
 RUN chmod +x /wait-for-postgres.sh
