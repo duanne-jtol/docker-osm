@@ -1,4 +1,4 @@
-FROM golang:buster
+FROM golang:1.16.0-buster
 MAINTAINER Etienne Trimaille <etienne.trimaille@gmail.com>
 
 ENV BF_DOWNLOAD_URL http://download.geofabrik.de/europe/sweden-latest.osm.pbf
