@@ -1,7 +1,16 @@
-FROM golang:1.16.0-buster
-MAINTAINER Etienne Trimaille <etienne.trimaille@gmail.com>
+FROM golang:1.16.0-buster as mother
+MAINTAINER Asdrubal Gonzalez <asdrubal.gonzalez@geo-solutions.it>
 
-ENV BF_DOWNLOAD_URL http://download.geofabrik.de/europe/sweden-latest.osm.pbf
+WORKDIR /code
+#Install the tool for merging the PBF files.
+RUN apt update && apt install osmium-tool -yq
+COPY ./*.pbf /code/
+RUN osmium merge denmark-latest.osm.pbf finland-latest.osm.pbf iceland-latest.osm.pbf norway-latest.osm.pbf sweden-latest.osm.pbf -o /code/scandinavia-latest.osm.pbf
+
+# Final Image.
+FROM golang:1.16.0-buster
+MAINTAINER Asdrubal Gonzalez <asdrubal.gonzalez@geo-solutions.it>
+
 RUN apt update && apt install -y python3-pip \
       libprotobuf-dev libleveldb-dev libgeos-dev \
       libpq-dev python3-dev postgresql-client-11 python-setuptools \
@@ -14,15 +23,14 @@ RUN go get github.com/tools/godep
 RUN git clone https://github.com/omniscale/imposm3 src/github.com/omniscale/imposm3
 RUN cd src/github.com/omniscale/imposm3 && make update_version && go install ./cmd/imposm/
 
+# Preparing everything for the importer.
 ADD requirements.txt /home/requirements.txt
 RUN pip3 install -r /home/requirements.txt
-
 ADD importer.py /home/
 
 # Add YAML Mapping file
 ADD mapping.yml /home/settings/mapping.yml
-# Add Sweden PBF for initial import
-ADD $BF_DOWNLOAD_URL /home/settings/sweden-latest.osm.pbf
+COPY --from=mother "/code/scandinavia-latest.osm.pbf" "/home/settings/scandinavia-latest.osm.pbf"
 
 ADD wait-for-postgres.sh /wait-for-postgres.sh
 RUN chmod +x /wait-for-postgres.sh
