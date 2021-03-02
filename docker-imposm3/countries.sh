@@ -1,5 +1,6 @@
 #!/bin/bash
 COUNTRIES=('sweden' 'denmark' 'norway' 'finland' 'iceland')
+COUNTRIES=('sweden')
 
 for country in "${COUNTRIES[@]}"
 do

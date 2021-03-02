@@ -3,9 +3,10 @@ MAINTAINER Asdrubal Gonzalez <asdrubal.gonzalez@geo-solutions.it>
 
 WORKDIR /code
 #Install the tool for merging the PBF files.
-RUN apt update && apt install osmium-tool -yq
+RUN apt update && apt install osmium-tool -yq && mkdir region
 COPY ./*.pbf /code/
-RUN osmium merge denmark-latest.osm.pbf finland-latest.osm.pbf iceland-latest.osm.pbf norway-latest.osm.pbf sweden-latest.osm.pbf -o /code/scandinavia-latest.osm.pbf
+#RUN osmium merge denmark-latest.osm.pbf finland-latest.osm.pbf iceland-latest.osm.pbf norway-latest.osm.pbf sweden-latest.osm.pbf -o /code/scandinavia-latest.osm.pbf
+RUN osmium merge *.pbf -o /code/region/region-latest.osm.pbf
 
 # Final Image.
 FROM golang:1.16.0-buster
@@ -30,7 +31,7 @@ ADD importer.py /home/
 
 # Add YAML Mapping file
 ADD mapping.yml /home/settings/mapping.yml
-COPY --from=mother "/code/scandinavia-latest.osm.pbf" "/home/settings/scandinavia-latest.osm.pbf"
+COPY --from=mother "/code/region/region-latest.osm.pbf" "/home/settings/region-latest.osm.pbf"
 
 ADD wait-for-postgres.sh /wait-for-postgres.sh
 RUN chmod +x /wait-for-postgres.sh
