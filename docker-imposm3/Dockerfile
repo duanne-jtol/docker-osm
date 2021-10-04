@@ -13,6 +13,8 @@ FROM golang:1.16.0-buster
 MAINTAINER Asdrubal Gonzalez <asdrubal.gonzalez@geo-solutions.it>
 
 RUN apt update && apt install -y python3-pip \
+      #Setuptools python package added
+      python3-setuptools \ 
       libprotobuf-dev libleveldb-dev libgeos-dev \
       libpq-dev python3-dev postgresql-client-11 python-setuptools \
       --no-install-recommends
