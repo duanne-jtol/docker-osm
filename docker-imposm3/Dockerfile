@@ -2,6 +2,8 @@ FROM golang:1.10
 MAINTAINER Etienne Trimaille <etienne.trimaille@gmail.com>
 
 RUN apt update && apt install -y python3-pip \
+      #Setuptools python package added
+      python3-setuptools \ 
       libprotobuf-dev libleveldb-dev libgeos-dev \
       libpq-dev python3-dev postgresql-client-9.6 python-setuptools \
       --no-install-recommends
