@@ -206,8 +206,7 @@ class Importer(object):
                     self.default['POSTGRES_PASS']))
             self.cursor = connection.cursor()
         except OperationalError as e:
-            print(stderr.write(e))
-
+            self.error(str(stderr.write(e)))
             exit()
 
         self.postgis_uri = 'postgis://%s:%s@%s/%s' % (
