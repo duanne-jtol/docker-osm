@@ -15,7 +15,7 @@ MAINTAINER Asdrubal Gonzalez <asdrubal.gonzalez@geo-solutions.it>
 RUN apt update && apt install -y python3-pip \
       python3-setuptools \
       libprotobuf-dev libleveldb-dev libgeos-dev \
-      libpq-dev python3-dev postgresql-client-13 python-setuptools \
+      libpq-dev python3-dev postgresql-client-11 python-setuptools \
       --no-install-recommends
 
 RUN ln -s /usr/lib/libgeos_c.so /usr/lib/libgeos.so
