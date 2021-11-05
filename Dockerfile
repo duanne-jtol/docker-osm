@@ -23,7 +23,7 @@ RUN ln -s /usr/lib/libgeos_c.so /usr/lib/libgeos.so
 WORKDIR $GOPATH
 RUN go get github.com/tools/godep
 RUN git clone https://github.com/omniscale/imposm3 src/github.com/omniscale/imposm3
-RUN cd src/github.com/omniscale/imposm3 && make update_version && go install ./cmd/imposm/
+RUN cd src/github.com/omniscale/imposm3 && git checkout tags/v0.11.1 && make update_version && go install ./cmd/imposm/
 
 # Preparing everything for the importer.
 ADD requirements.txt /home/requirements.txt
